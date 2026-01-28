@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  name         String?
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model List {
+  id        String    @id @default(uuid())
+  title     String
+  summary   String
+  theme     String
+  sections  Section[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Section {
+  id        String  @id @default(uuid())
+  title     String
+  summary   String
+  list      List    @relation(fields: [listId], references: [id])
+  listId    String
+  books     Book[]
+  order     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Book {
+  id          String  @id @default(uuid())
+  title       String
+  author      String
+  description String
+  amazonUrl   String
+  section     Section @relation(fields: [sectionId], references: [id])
+  sectionId   String
+  order       Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
