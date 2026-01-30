@@ -17,36 +17,87 @@ model User {
 }
 
 model List {
-  id        String    @id @default(uuid())
-  title     String
-  summary   String
-  theme     String
-  sections  Section[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id         String           @id @default(uuid())
+  title      String
+  summary    String
+  theme      String
+  expert     Expert?          @relation(fields: [expertId], references: [id])
+  expertId   String?
+  sections   ListSection[]
+  categories ListOnCategory[]
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
 }
 
-model Section {
-  id        String  @id @default(uuid())
+model ListSection {
+  id        String     @id @default(uuid())
   title     String
   summary   String
-  list      List    @relation(fields: [listId], references: [id])
+  list      List       @relation(fields: [listId], references: [id])
   listId    String
-  books     Book[]
+  items     ListItem[]
   order     Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 }
 
-model Book {
-  id          String  @id @default(uuid())
-  title       String
-  author      String
-  description String
-  amazonUrl   String
-  section     Section @relation(fields: [sectionId], references: [id])
-  sectionId   String
-  order       Int
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+model ListItem {
+  id             String      @id @default(uuid())
+  asin           String
+  titleOverride  String?
+  authorOverride String?
+  noteShort      String?
+  noteLong       String?
+  section        ListSection @relation(fields: [sectionId], references: [id])
+  sectionId      String
+  order          Int
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+}
+
+model ListCategory {
+  id        String         @id @default(uuid())
+  name      String
+  parent    ListCategory?  @relation("ListCategoryHierarchy", fields: [parentId], references: [id])
+  parentId  String?
+  children  ListCategory[] @relation("ListCategoryHierarchy")
+  lists     ListOnCategory[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+}
+
+model ListOnCategory {
+  list       List         @relation(fields: [listId], references: [id])
+  listId     String
+  category   ListCategory @relation(fields: [categoryId], references: [id])
+  categoryId String
+
+  @@id([listId, categoryId])
+}
+
+model Expert {
+  id           String                      @id @default(uuid())
+  name         String
+  title        String?
+  lists        List[]
+  expertise    ExpertOnExpertiseCategory[]
+  createdAt    DateTime                    @default(now())
+  updatedAt    DateTime                    @updatedAt
+}
+
+model ExpertiseCategory {
+  id        String                      @id @default(uuid())
+  name      String
+  experts   ExpertOnExpertiseCategory[]
+  createdAt DateTime                    @default(now())
+  updatedAt DateTime                    @updatedAt
+}
+
+model ExpertOnExpertiseCategory {
+  expert       Expert            @relation(fields: [expertId], references: [id])
+  expertId     String
+  category     ExpertiseCategory @relation(fields: [categoryId], references: [id])
+  categoryId   String
+
+  @@id([expertId, categoryId])
 }

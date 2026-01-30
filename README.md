@@ -21,6 +21,7 @@ cp .env.example .env
 - `DATABASE_URL`
 - `NEXTAUTH_SECRET`
 - `NEXTAUTH_URL`
+- `AMAZON_ASSOCIATE_TAG`
 
 3. Postgres’i başlatın:
 
@@ -59,7 +60,7 @@ VALUES (gen_random_uuid(), 'editor@iyikitap.com', '<HASH>', now(), now());
 
 - `src/app` → Next.js App Router sayfaları
 - `src/lib` → veri/kimlik doğrulama yardımcıları
-- `prisma/schema.prisma` → listeler, bölümler ve kitaplar için veri modeli
+- `prisma/schema.prisma` → listeler, bölümler, öğeler, kategoriler ve uzmanlıklar için veri modeli
 
 ## Notlar
 
