@@ -1,21 +1,77 @@
-export type Book = {
-  title: string;
-  author: string;
-  description: string;
-  amazonUrl: string;
+const ITEMS_PER_SECTION = 5;
+const ITEM_ORDER_MIN = 1;
+const ITEM_ORDER_MAX = 5;
+
+const getAmazonAssociateTag = () => {
+  const associateTag = process.env.AMAZON_ASSOCIATE_TAG;
+
+  if (!associateTag) {
+    throw new Error("AMAZON_ASSOCIATE_TAG is required.");
+  }
+
+  return associateTag;
 };
 
-export type Section = {
+export type ListItem = {
+  asin: string;
+  titleOverride?: string;
+  authorOverride?: string;
+  noteShort?: string;
+  noteLong?: string;
+  order: number;
+};
+
+export type ListSection = {
   title: string;
-  description: string;
-  books: Book[];
+  summary: string;
+  order: number;
+  items: ListItem[];
 };
 
 export type List = {
   title: string;
   summary: string;
   theme: string;
-  sections: Section[];
+  sections: ListSection[];
+};
+
+export const buildAmazonLink = (asin: string) => {
+  const associateTag = getAmazonAssociateTag();
+  const baseUrl = `https://www.amazon.com.tr/dp/${asin}`;
+
+  return `${baseUrl}?tag=${associateTag}`;
+};
+
+const assertSectionHasFiveItems = (section: ListSection) => {
+  if (section.items.length !== ITEMS_PER_SECTION) {
+    throw new Error(
+      `List section "${section.title}" must have exactly ${ITEMS_PER_SECTION} items.`,
+    );
+  }
+
+  const orders = new Set(section.items.map((item) => item.order));
+
+  if (orders.size !== ITEMS_PER_SECTION) {
+    throw new Error(
+      `List section "${section.title}" must use unique item orders 1-5.`,
+    );
+  }
+
+  section.items.forEach((item) => {
+    if (item.order < ITEM_ORDER_MIN || item.order > ITEM_ORDER_MAX) {
+      throw new Error(
+        `List item "${item.asin}" must have order between ${ITEM_ORDER_MIN} and ${ITEM_ORDER_MAX}.`,
+      );
+    }
+  });
+};
+
+const assertListsArePublishable = (candidateLists: List[]) => {
+  candidateLists.forEach((list) => {
+    list.sections.forEach((section) => {
+      assertSectionHasFiveItems(section);
+    });
+  });
 };
 
 export const lists: List[] = [
@@ -27,75 +83,97 @@ export const lists: List[] = [
     sections: [
       {
         title: "Derin çalışma ritüelleri",
-        description:
+        summary:
           "Kalıcı alışkanlıklar kurmak için bilimsel ve pratik yaklaşımlar.",
-        books: [
+        order: 1,
+        items: [
           {
-            title: "Deep Work",
-            author: "Cal Newport",
-            description: "Kesintisiz odak için stratejiler ve çalışma ritüelleri.",
-            amazonUrl: "https://www.amazon.com/",
+            asin: "B00XW5WJ8Y",
+            titleOverride: "Deep Work",
+            authorOverride: "Cal Newport",
+            noteShort: "Kesintisiz odak için stratejiler.",
+            noteLong: "Uzun odak bloklarıyla kaliteli üretime geçiş rehberi.",
+            order: 1,
           },
           {
-            title: "Atomic Habits",
-            author: "James Clear",
-            description: "Küçük alışkanlıkları sürdürülebilir sistemlere dönüştürme.",
-            amazonUrl: "https://www.amazon.com/",
+            asin: "B01N5AX61W",
+            titleOverride: "Atomic Habits",
+            authorOverride: "James Clear",
+            noteShort: "Küçük alışkanlıkları sistemlere dönüştürün.",
+            noteLong: "Günlük mikro alışkanlıklarla sürdürülebilir gelişim.",
+            order: 2,
           },
           {
-            title: "The One Thing",
-            author: "Gary Keller & Jay Papasan",
-            description: "Önceliklendirme ile sonuç odaklı ilerleme.",
-            amazonUrl: "https://www.amazon.com/",
+            asin: "B00EMHACRU",
+            titleOverride: "The One Thing",
+            authorOverride: "Gary Keller & Jay Papasan",
+            noteShort: "Önceliklendirme ile sonuç odaklı ilerleme.",
+            noteLong: "Tek kritik hedefe odaklanarak verimi artırma.",
+            order: 3,
           },
           {
-            title: "Essentialism",
-            author: "Greg McKeown",
-            description: "Gereksiz yüklerden arınmış üretkenlik.",
-            amazonUrl: "https://www.amazon.com/",
+            asin: "B00G1J1D28",
+            titleOverride: "Essentialism",
+            authorOverride: "Greg McKeown",
+            noteShort: "Gereksiz yüklerden arınmış üretkenlik.",
+            noteLong: "Az ama etkili görevlerle enerjiyi koruma.",
+            order: 4,
           },
           {
-            title: "Make Time",
-            author: "Jake Knapp & John Zeratsky",
-            description: "Günlük odak bloklarıyla zaman yönetimi.",
-            amazonUrl: "https://www.amazon.com/",
+            asin: "B01M2YX1AC",
+            titleOverride: "Make Time",
+            authorOverride: "Jake Knapp & John Zeratsky",
+            noteShort: "Günlük odak bloklarıyla zaman yönetimi.",
+            noteLong: "Dikkati dağıtan unsurları filtreleyen pratikler.",
+            order: 5,
           },
         ],
       },
       {
         title: "Yaratıcı enerji ve ilham",
-        description:
+        summary:
           "Çalışma rutinine ilham katmak isteyenler için yaratıcı düşünme kaynakları.",
-        books: [
+        order: 2,
+        items: [
           {
-            title: "Steal Like an Artist",
-            author: "Austin Kleon",
-            description: "Yaratıcı üretimde etik ve esinlenme.",
-            amazonUrl: "https://www.amazon.com/",
+            asin: "B0074QGGK6",
+            titleOverride: "Steal Like an Artist",
+            authorOverride: "Austin Kleon",
+            noteShort: "Yaratıcı üretimde etik ve esinlenme.",
+            noteLong: "İlhamı yakalayıp özgün üretime dönüştürme.",
+            order: 1,
           },
           {
-            title: "Show Your Work!",
-            author: "Austin Kleon",
-            description: "Üretimini paylaşmak ve görünür kılmak için yöntemler.",
-            amazonUrl: "https://www.amazon.com/",
+            asin: "B00E257T6C",
+            titleOverride: "Show Your Work!",
+            authorOverride: "Austin Kleon",
+            noteShort: "Üretimini paylaşmak için yöntemler.",
+            noteLong: "Görünürlük ve paylaşım pratikleriyle etki yaratma.",
+            order: 2,
           },
           {
-            title: "Creative Confidence",
-            author: "Tom Kelley & David Kelley",
-            description: "Yaratıcılığı günlük bir kas gibi güçlendirme.",
-            amazonUrl: "https://www.amazon.com/",
+            asin: "B00FJEYHI8",
+            titleOverride: "Creative Confidence",
+            authorOverride: "Tom Kelley & David Kelley",
+            noteShort: "Yaratıcılığı günlük kas gibi güçlendirme.",
+            noteLong: "Deneysel düşünceyle risk almaya teşvik.",
+            order: 3,
           },
           {
-            title: "The War of Art",
-            author: "Steven Pressfield",
-            description: "Dirençle baş etmek için yaratıcı disiplin.",
-            amazonUrl: "https://www.amazon.com/",
+            asin: "B00DPM7TIG",
+            titleOverride: "The War of Art",
+            authorOverride: "Steven Pressfield",
+            noteShort: "Dirençle baş etmek için yaratıcı disiplin.",
+            noteLong: "Üretkenliği baltalayan iç dirence karşı stratejiler.",
+            order: 4,
           },
           {
-            title: "Big Magic",
-            author: "Elizabeth Gilbert",
-            description: "Yaratıcı cesareti canlı tutma.",
-            amazonUrl: "https://www.amazon.com/",
+            asin: "B00J2JYPBS",
+            titleOverride: "Big Magic",
+            authorOverride: "Elizabeth Gilbert",
+            noteShort: "Yaratıcı cesareti canlı tutma.",
+            noteLong: "Üretimde merak ve cesaretle ilerleme rehberi.",
+            order: 5,
           },
         ],
       },
@@ -109,78 +187,102 @@ export const lists: List[] = [
     sections: [
       {
         title: "Empatik liderlik",
-        description:
+        summary:
           "İnsan ilişkilerinde güven ve netlik kurmak isteyen yöneticilere.",
-        books: [
+        order: 1,
+        items: [
           {
-            title: "Dare to Lead",
-            author: "Brené Brown",
-            description: "Cesur liderlik ve kırılganlık yönetimi.",
-            amazonUrl: "https://www.amazon.com/",
+            asin: "B06XQ6XKCH",
+            titleOverride: "Dare to Lead",
+            authorOverride: "Brené Brown",
+            noteShort: "Cesur liderlik ve kırılganlık yönetimi.",
+            noteLong: "Empati temelli güven kültürü için rehber.",
+            order: 1,
           },
           {
-            title: "The Culture Code",
-            author: "Daniel Coyle",
-            description: "Yüksek performanslı ekiplerin kültür kodları.",
-            amazonUrl: "https://www.amazon.com/",
+            asin: "B01ARSCF9A",
+            titleOverride: "The Culture Code",
+            authorOverride: "Daniel Coyle",
+            noteShort: "Yüksek performanslı ekiplerin kültür kodları.",
+            noteLong: "Aidiyet ve güveni artıran davranışlar.",
+            order: 2,
           },
           {
-            title: "Leaders Eat Last",
-            author: "Simon Sinek",
-            description: "Güven ve aidiyet oluşturma üzerine.",
-            amazonUrl: "https://www.amazon.com/",
+            asin: "B00HG0P3CE",
+            titleOverride: "Leaders Eat Last",
+            authorOverride: "Simon Sinek",
+            noteShort: "Güven ve aidiyet oluşturma üzerine.",
+            noteLong: "Takım bağlılığı için liderlik kasları.",
+            order: 3,
           },
           {
-            title: "Radical Candor",
-            author: "Kim Scott",
-            description: "Dürüst geri bildirim ile güven kurma.",
-            amazonUrl: "https://www.amazon.com/",
+            asin: "B01N0QZQ1A",
+            titleOverride: "Radical Candor",
+            authorOverride: "Kim Scott",
+            noteShort: "Dürüst geri bildirim ile güven kurma.",
+            noteLong: "Açık iletişimle performans kültürü inşası.",
+            order: 4,
           },
           {
-            title: "Multipliers",
-            author: "Liz Wiseman",
-            description: "Yetenekleri büyüten liderlik modelleri.",
-            amazonUrl: "https://www.amazon.com/",
+            asin: "B00BHEB9EQ",
+            titleOverride: "Multipliers",
+            authorOverride: "Liz Wiseman",
+            noteShort: "Yetenekleri büyüten liderlik modelleri.",
+            noteLong: "Takımın kapasitesini büyüten lider profili.",
+            order: 5,
           },
         ],
       },
       {
         title: "Stratejik yön",
-        description:
+        summary:
           "Net yön belirlemek ve paydaşları hizalamak isteyen liderlere.",
-        books: [
+        order: 2,
+        items: [
           {
-            title: "Good Strategy Bad Strategy",
-            author: "Richard Rumelt",
-            description: "Net strateji çerçeveleri ve vaka örnekleri.",
-            amazonUrl: "https://www.amazon.com/",
+            asin: "B005J4XKBE",
+            titleOverride: "Good Strategy Bad Strategy",
+            authorOverride: "Richard Rumelt",
+            noteShort: "Net strateji çerçeveleri ve vaka örnekleri.",
+            noteLong: "Stratejik kararları basitleştiren yaklaşım.",
+            order: 1,
           },
           {
-            title: "Measure What Matters",
-            author: "John Doerr",
-            description: "OKR yaklaşımıyla hedeflere odaklanma.",
-            amazonUrl: "https://www.amazon.com/",
+            asin: "B074SX9WLC",
+            titleOverride: "Measure What Matters",
+            authorOverride: "John Doerr",
+            noteShort: "OKR yaklaşımıyla hedeflere odaklanma.",
+            noteLong: "Hedef hizalaması için ölçülebilir sistemler.",
+            order: 2,
           },
           {
-            title: "Playing to Win",
-            author: "A.G. Lafley & Roger Martin",
-            description: "Rekabet avantajı yaratma yolları.",
-            amazonUrl: "https://www.amazon.com/",
+            asin: "B00G3L1A7S",
+            titleOverride: "Playing to Win",
+            authorOverride: "A.G. Lafley & Roger Martin",
+            noteShort: "Rekabet avantajı yaratma yolları.",
+            noteLong: "Pazar oyun planını netleştiren stratejiler.",
+            order: 3,
           },
           {
-            title: "The Advantage",
-            author: "Patrick Lencioni",
-            description: "Organizasyonel sağlık üzerine liderlik rehberi.",
-            amazonUrl: "https://www.amazon.com/",
+            asin: "B00G4LGR08",
+            titleOverride: "The Advantage",
+            authorOverride: "Patrick Lencioni",
+            noteShort: "Organizasyonel sağlık üzerine liderlik rehberi.",
+            noteLong: "Sağlıklı kültürün performansa etkisi.",
+            order: 4,
           },
           {
-            title: "High Output Management",
-            author: "Andrew S. Grove",
-            description: "Operasyonel yönetim pratiği ve metrikler.",
-            amazonUrl: "https://www.amazon.com/",
+            asin: "B00DQ845EA",
+            titleOverride: "High Output Management",
+            authorOverride: "Andrew S. Grove",
+            noteShort: "Operasyonel yönetim pratiği ve metrikler.",
+            noteLong: "Performans takibini güçlendiren yönetim anlayışı.",
+            order: 5,
           },
         ],
       },
     ],
   },
 ];
+
+assertListsArePublishable(lists);
