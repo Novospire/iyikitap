@@ -1,4 +1,4 @@
-import { lists } from "@/lib/data";
+import { buildAmazonLink, lists } from "@/lib/data";
 
 export default function HomePage() {
   return (
@@ -81,7 +81,9 @@ export default function HomePage() {
                 </a>
               </header>
               <div className="mt-8 grid gap-8 lg:grid-cols-2">
-                {list.sections.map((section) => (
+                {[...list.sections]
+                  .sort((a, b) => a.order - b.order)
+                  .map((section) => (
                   <section
                     key={section.title}
                     className="rounded-2xl border border-slate-100 bg-slate-50 p-6"
@@ -92,7 +94,7 @@ export default function HomePage() {
                           {section.title}
                         </h5>
                         <p className="mt-2 text-sm text-slate-600">
-                          {section.description}
+                          {section.summary}
                         </p>
                       </div>
                       <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-500 shadow-sm">
@@ -100,32 +102,43 @@ export default function HomePage() {
                       </span>
                     </div>
                     <ul className="mt-6 space-y-4">
-                      {section.books.map((book) => (
-                        <li
-                          key={book.title}
-                          className="rounded-xl border border-slate-100 bg-white p-4"
-                        >
-                          <div className="flex flex-col gap-3">
-                            <div>
-                              <p className="text-sm font-semibold text-ink">
-                                {book.title}
-                              </p>
-                              <p className="text-xs text-slate-500">
-                                {book.author}
-                              </p>
-                              <p className="mt-2 text-sm text-slate-600">
-                                {book.description}
-                              </p>
+                      {[...section.items]
+                        .sort((a, b) => a.order - b.order)
+                        .map((item) => (
+                          <li
+                            key={`${item.asin}-${item.order}`}
+                            className="rounded-xl border border-slate-100 bg-white p-4"
+                          >
+                            <div className="flex flex-col gap-3">
+                              <div>
+                                <p className="text-sm font-semibold text-ink">
+                                  {item.titleOverride ?? `ASIN ${item.asin}`}
+                                </p>
+                                {item.authorOverride ? (
+                                  <p className="text-xs text-slate-500">
+                                    {item.authorOverride}
+                                  </p>
+                                ) : null}
+                                {item.noteShort ? (
+                                  <p className="mt-2 text-sm font-semibold text-slate-700">
+                                    {item.noteShort}
+                                  </p>
+                                ) : null}
+                                {item.noteLong ? (
+                                  <p className="mt-2 text-sm text-slate-600">
+                                    {item.noteLong}
+                                  </p>
+                                ) : null}
+                              </div>
+                              <a
+                                href={buildAmazonLink(item.asin)}
+                                className="inline-flex w-fit rounded-full bg-brand px-4 py-2 text-xs font-semibold text-white"
+                              >
+                                Amazon’da Gör
+                              </a>
                             </div>
-                            <a
-                              href={book.amazonUrl}
-                              className="inline-flex w-fit rounded-full bg-brand px-4 py-2 text-xs font-semibold text-white"
-                            >
-                              Amazon’da Gör
-                            </a>
-                          </div>
-                        </li>
-                      ))}
+                          </li>
+                        ))}
                     </ul>
                   </section>
                 ))}
