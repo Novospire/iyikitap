@@ -19,10 +19,7 @@ model User {
 model List {
   id         String           @id @default(uuid())
   title      String
-<<<<<<< HEAD
-=======
   slug       String           @unique
->>>>>>> origin/main
   summary    String
   theme      String
   expert     Expert?          @relation(fields: [expertId], references: [id])
@@ -60,18 +57,15 @@ model ListItem {
 }
 
 model ListCategory {
-  id        String         @id @default(uuid())
+  id        String           @id @default(uuid())
   name      String
-<<<<<<< HEAD
-=======
-  slug      String         @unique
->>>>>>> origin/main
-  parent    ListCategory?  @relation("ListCategoryHierarchy", fields: [parentId], references: [id])
+  slug      String           @unique
+  parent    ListCategory?    @relation("ListCategoryHierarchy", fields: [parentId], references: [id])
   parentId  String?
-  children  ListCategory[] @relation("ListCategoryHierarchy")
+  children  ListCategory[]   @relation("ListCategoryHierarchy")
   lists     ListOnCategory[]
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
 }
 
 model ListOnCategory {
@@ -84,13 +78,13 @@ model ListOnCategory {
 }
 
 model Expert {
-  id           String                      @id @default(uuid())
-  name         String
-  title        String?
-  lists        List[]
-  expertise    ExpertOnExpertiseCategory[]
-  createdAt    DateTime                    @default(now())
-  updatedAt    DateTime                    @updatedAt
+  id        String                      @id @default(uuid())
+  name      String
+  title     String?
+  lists     List[]
+  expertise ExpertOnExpertiseCategory[]
+  createdAt DateTime                    @default(now())
+  updatedAt DateTime                    @updatedAt
 }
 
 model ExpertiseCategory {
@@ -102,10 +96,10 @@ model ExpertiseCategory {
 }
 
 model ExpertOnExpertiseCategory {
-  expert       Expert            @relation(fields: [expertId], references: [id])
-  expertId     String
-  category     ExpertiseCategory @relation(fields: [categoryId], references: [id])
-  categoryId   String
+  expert     Expert            @relation(fields: [expertId], references: [id])
+  expertId   String
+  category   ExpertiseCategory @relation(fields: [categoryId], references: [id])
+  categoryId String
 
   @@id([expertId, categoryId])
 }
