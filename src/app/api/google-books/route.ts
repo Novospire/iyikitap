@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 const GOOGLE_BOOKS_ENDPOINT = "https://www.googleapis.com/books/v1/volumes";
 const MAX_RESULTS_DEFAULT = 20;
-const MAX_RESULTS_LIMIT = 40;
+const MAX_RESULTS_LIMIT = 20;
 
 type GoogleBooksVolume = {
   id: string;

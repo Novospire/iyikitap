@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 
 const GOOGLE_BOOKS_ENDPOINT = "https://www.googleapis.com/books/v1/volumes";
 const ISBN_13_REGEX = /^\\d{13}$/;
+type ListItemWithInfoLink = { infoLink?: string | null };
 
 export default async function Page({
   params,
@@ -30,10 +31,13 @@ export default async function Page({
     new Set(
       list.sections
         .flatMap((section) => section.items)
-        .map((item) => item.asin.trim())
         .filter(
-          (asin) => asin && (ISBN_13_REGEX.test(asin) || asin.length !== 10),
-        ),
+          (item) =>
+            !("infoLink" in item) ||
+            !((item as ListItemWithInfoLink).infoLink ?? null),
+        )
+        .map((item) => item.asin.trim())
+        .filter((asin) => asin.length > 0),
     ),
   );
 
@@ -93,7 +97,9 @@ export default async function Page({
                   <a
                     className="mt-2 inline-block underline"
                     href={
-                      (it as { infoLink?: string | null }).infoLink ??
+                      ("infoLink" in it
+                        ? (it as ListItemWithInfoLink).infoLink
+                        : null) ??
                       googleInfoLinks.get(it.asin) ??
                       `https://www.amazon.com.tr/dp/${it.asin}`
                     }
