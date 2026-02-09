@@ -19,6 +19,7 @@ model User {
 model List {
   id         String           @id @default(uuid())
   title      String
+  slug       String           @unique
   summary    String
   theme      String
   expert     Expert?          @relation(fields: [expertId], references: [id])
@@ -58,6 +59,7 @@ model ListItem {
 model ListCategory {
   id        String         @id @default(uuid())
   name      String
+  slug      String         @unique
   parent    ListCategory?  @relation("ListCategoryHierarchy", fields: [parentId], references: [id])
   parentId  String?
   children  ListCategory[] @relation("ListCategoryHierarchy")
