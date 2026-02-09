@@ -41,6 +41,22 @@ npm run prisma:migrate
 npm run dev
 ```
 
+## Demo: Google Books import
+
+1. Admin import sayfasına gidin:
+
+```
+http://localhost:3000/admin/import
+```
+
+2. İsterseniz hedef bölümü belirtmek için `sectionId` parametresi ekleyin:
+
+```
+http://localhost:3000/admin/import?sectionId=<LIST_SECTION_ID>
+```
+
+3. Arama yapıp sonuçlardan 10–20 kitap seçerek mevcut liste bölümüne ekleyin.
+
 ## Editoryal kullanıcı oluşturma
 
 NextAuth Credentials sağlayıcısı için kullanıcı kayıtları `User` tablosunda tutulur. Basit bir örnek akış:
