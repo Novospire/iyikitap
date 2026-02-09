@@ -2,6 +2,27 @@ const ITEMS_PER_SECTION = 5;
 const ITEM_ORDER_MIN = 1;
 const ITEM_ORDER_MAX = 5;
 
+<<<<<<< HEAD
+const getAmazonAssociateTag = () => {
+  const associateTag = process.env.AMAZON_ASSOCIATE_TAG;
+
+  if (!associateTag) {
+    throw new Error("AMAZON_ASSOCIATE_TAG is required.");
+  }
+
+  return associateTag;
+};
+
+export type ListItem = {
+  asin: string;
+  titleOverride?: string;
+  authorOverride?: string;
+  noteShort?: string;
+  noteLong?: string;
+  order: number;
+};
+
+=======
 const AMAZON_ASSOCIATE_TAG = process.env.AMAZON_ASSOCIATE_TAG;
 
 if (!AMAZON_ASSOCIATE_TAG) {
@@ -17,6 +38,7 @@ export type ListItem = {
   order: number;
 };
 
+>>>>>>> origin/main
 export type ListSection = {
   title: string;
   summary: string;
@@ -32,9 +54,16 @@ export type List = {
 };
 
 export const buildAmazonLink = (asin: string) => {
+<<<<<<< HEAD
+  const associateTag = getAmazonAssociateTag();
+  const baseUrl = `https://www.amazon.com.tr/dp/${asin}`;
+
+  return `${baseUrl}?tag=${associateTag}`;
+=======
   const baseUrl = `https://www.amazon.com.tr/dp/${asin}`;
 
   return `${baseUrl}?tag=${AMAZON_ASSOCIATE_TAG}`;
+>>>>>>> origin/main
 };
 
 const assertSectionHasFiveItems = (section: ListSection) => {
@@ -61,7 +90,11 @@ const assertSectionHasFiveItems = (section: ListSection) => {
   });
 };
 
+<<<<<<< HEAD
+const assertListsArePublishable = (candidateLists: List[]) => {
+=======
 const assertListsAreValid = (candidateLists: List[]) => {
+>>>>>>> origin/main
   candidateLists.forEach((list) => {
     list.sections.forEach((section) => {
       assertSectionHasFiveItems(section);
@@ -280,4 +313,8 @@ export const lists: List[] = [
   },
 ];
 
+<<<<<<< HEAD
+assertListsArePublishable(lists);
+=======
 assertListsAreValid(lists);
+>>>>>>> origin/main
