@@ -1,62 +1,75 @@
+<<<<<<< HEAD
 import { buildAmazonLink, lists } from "@/lib/data";
+=======
+// src/app/page.tsx
+import Link from "next/link";
+import { PrismaClient } from "@prisma/client";
 
-export default function HomePage() {
+const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
+
+const prisma =
+  globalForPrisma.prisma ??
+  new PrismaClient({
+    log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
+  });
+
+if (process.env.NODE_ENV === "development") globalForPrisma.prisma = prisma;
+
+export default async function HomePage() {
+  const lists = await prisma.list.findMany({
+    orderBy: { createdAt: "desc" },
+    take: 12,
+    include: {
+      expert: true,
+      sections: true,
+    },
+  });
+>>>>>>> origin/main
+
   return (
-    <div className="space-y-20 pb-20">
-      <section className="grid gap-10 rounded-3xl bg-white p-10 shadow-card md:grid-cols-[1.1fr_0.9fr]">
-        <div className="space-y-6">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-accent">
-            Editoryal liste merkezi
-          </p>
-          <h2 className="text-4xl font-semibold text-ink">
-            Kitapları değil, listeleri keşfedin.
-          </h2>
-          <p className="text-lg text-slate-600">
-            İyi Kitap, her biri beşer kitaplık bölümlerden oluşan tematik
-            listelerle okuma yolculuğunuza yön verir. Satış yok, yalnızca editoryal
-            kürasyon ve Amazon bağlantıları.
-          </p>
-          <div className="flex flex-wrap gap-4">
-            <a
-              href="#listeler"
-              className="rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white"
-            >
-              Amazon’da Gör
-            </a>
-            <a
-              href="#neden"
-              className="rounded-full border border-slate-200 px-6 py-3 text-sm font-semibold text-slate-700"
-            >
-              Neden liste odaklı?
-            </a>
-          </div>
-        </div>
-        <div className="rounded-2xl border border-slate-100 bg-slate-50 p-6">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-400">
-            Haftanın özeti
-          </p>
-          <ul className="mt-6 space-y-4 text-slate-700">
-            <li className="rounded-xl bg-white p-4 shadow-sm">
-              2 ana liste, 4 bölüm, toplam 20 kitap.
-            </li>
-            <li className="rounded-xl bg-white p-4 shadow-sm">
-              Her bölümde tam 5 kitap; hızlı karşılaştırma için ideal.
-            </li>
-            <li className="rounded-xl bg-white p-4 shadow-sm">
-              Tüm çağrılar Amazon’a yönlendiren “Amazon’da Gör”.
-            </li>
-          </ul>
+    <main className="mx-auto max-w-5xl px-6 py-10">
+      {/* HERO */}
+      <section className="rounded-3xl bg-white p-10 shadow-card">
+        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-500">
+          Editoryal liste merkezi
+        </p>
+
+        <h1 className="mt-4 text-4xl font-semibold text-ink">
+          Kitapları değil, listeleri keşfedin.
+        </h1>
+
+        <p className="mt-4 max-w-2xl text-lg text-slate-600">
+          İyi Kitap, her biri beşer kitaplık bölümlerden oluşan tematik listelerle
+          okuma yolculuğuna yön verir. Satış yok; yalnızca editoryal kürasyon ve
+          Amazon bağlantıları.
+        </p>
+
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Link
+            href="/lists"
+            className="rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white"
+          >
+            Listelere git
+          </Link>
+
+          <a
+            href="#listeler"
+            className="rounded-full bg-slate-100 px-6 py-3 text-sm font-semibold text-slate-800"
+          >
+            Ana sayfada listeler
+          </a>
         </div>
       </section>
 
-      <section id="listeler" className="space-y-10">
-        <div className="space-y-3">
-          <h3 className="text-3xl font-semibold text-ink">Öne çıkan listeler</h3>
-          <p className="text-slate-600">
-            Her liste, içerideki bölümlerle bir yol haritası sunar. Bölümlerin
-            hepsi beş kitapla sınırlı, böylece hızlıca karar verebilirsiniz.
-          </p>
+      {/* LISTS */}
+      <section id="listeler" className="mt-10">
+        <div className="mb-4 flex items-end justify-between">
+          <h2 className="text-xl font-semibold text-ink">Son listeler</h2>
+          <Link href="/lists" className="text-sm font-semibold text-brand">
+            Tümünü gör →
+          </Link>
         </div>
+<<<<<<< HEAD
         <div className="space-y-12">
           {lists.map((list) => (
             <article
@@ -147,53 +160,52 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+=======
 
-      <section id="neden" className="grid gap-8 rounded-3xl bg-white p-10 shadow-card md:grid-cols-3">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-accent">
-            Neden listeler?
-          </p>
-          <h3 className="mt-3 text-2xl font-semibold text-ink">
-            Keşif odaklı editoryal yaklaşım
-          </h3>
-        </div>
-        <div className="space-y-4 text-slate-600 md:col-span-2">
-          <p>
-            Listelerimiz kitapları tek tek satmak için değil, ihtiyaçlarınıza uygun
-            kombinasyonları hızlıca görmeniz için hazırlanır. Her bölüm beş kitapla
-            sınırlıdır.
-          </p>
-          <p>
-            Her karttaki “Amazon’da Gör” çağrısı, detaylara hızlıca geçmenizi
-            sağlar. Böylece karar süreciniz kısalır, odak artar.
-          </p>
-        </div>
-      </section>
-
-      <section id="bulten" className="rounded-3xl bg-ink p-10 text-white">
-        <div className="grid gap-6 md:grid-cols-[1.2fr_0.8fr]">
-          <div className="space-y-4">
-            <h3 className="text-2xl font-semibold">Yeni listelerden haberdar olun</h3>
-            <p className="text-sm text-slate-200">
-              Haftalık listeler, bölüm notları ve seçili Amazon bağlantıları için
-              bültene katılın.
-            </p>
+        {lists.length === 0 ? (
+          <div className="rounded-2xl bg-white p-6 text-slate-600 shadow-card">
+            Henüz liste yok. Prisma Studio’dan bir liste ekle, burada görünsün.
           </div>
-          <form className="flex flex-col gap-3 rounded-2xl bg-white/10 p-4">
-            <input
-              type="email"
-              placeholder="E-posta adresiniz"
-              className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm text-white placeholder:text-slate-200"
-            />
-            <button
-              type="button"
-              className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-ink"
-            >
-              Amazon’da Gör
-            </button>
-          </form>
-        </div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2">
+            {lists.map((l) => (
+              <article
+                key={l.id}
+                className="rounded-2xl bg-white p-6 shadow-card"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-ink">{l.title}</h3>
+                    {l.summary ? (
+                      <p className="mt-2 text-sm text-slate-600">{l.summary}</p>
+                    ) : null}
+
+                    <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                      {l.expert?.name ? (
+                        <span className="rounded-full bg-slate-100 px-3 py-1">
+                          {l.expert.name}
+                        </span>
+                      ) : null}
+                      <span className="rounded-full bg-slate-100 px-3 py-1">
+                        Bölüm: {l.sections?.length ?? 0}
+                      </span>
+                    </div>
+                  </div>
+>>>>>>> origin/main
+
+                  {/* Şimdilik liste detay route’un yoksa /lists’e gönderiyoruz */}
+                  <Link
+                    href="/lists"
+                    className="shrink-0 rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white"
+                  >
+                    Aç
+                  </Link>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
       </section>
-    </div>
+    </main>
   );
 }
