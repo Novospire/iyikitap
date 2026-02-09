@@ -23,6 +23,8 @@ cp .env.example .env
 - `NEXTAUTH_URL`
 - `AMAZON_ASSOCIATE_TAG`
 
+> Note: Direct pushes to `main` are blocked by repository rules. Create a branch and open a PR for every change.
+
 3. Postgres’i başlatın:
 
 ```bash
@@ -57,6 +59,8 @@ npx prisma migrate dev
 **Preview / Production (Vercel)**
 - Add `DATABASE_URL` to Vercel → Project Settings → Environment Variables
 - If `DATABASE_URL` is missing, `/admin/import` will show **“Setup required”** instead of crashing.
+
+> This does not mean the app is DB-less. It only prevents crashes when DATABASE_URL is missing. Admin/DB-backed pages still require a database.
 
 ## Demo: Google Books import
 
