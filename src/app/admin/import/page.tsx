@@ -1,12 +1,33 @@
-import { prisma } from "@/lib/prisma";
-
 import ImportClient from "./import-client";
 
 type ImportPageProps = {
   searchParams?: { sectionId?: string };
 };
 
+function SetupRequired() {
+  return (
+    <div className="mx-auto max-w-2xl p-8">
+      <h1 className="text-2xl font-semibold">Setup required</h1>
+      <p className="mt-3 text-sm text-neutral-600">
+        DATABASE_URL is not configured. This page needs a database connection.
+      </p>
+      <p className="mt-2 text-sm text-neutral-600">
+        Add <code className="rounded bg-neutral-100 px-1">DATABASE_URL</code> to your environment
+        variables (local .env, Vercel Preview/Production) and reload.
+      </p>
+    </div>
+  );
+}
+
 export default async function ImportPage({ searchParams }: ImportPageProps) {
+  // GUARD: env yoksa Prisma'ya dokunma
+  if (!process.env.DATABASE_URL) {
+    return <SetupRequired />;
+  }
+
+  // Env varsa Prisma'yı dinamik import et
+  const { prisma } = await import("@/lib/prisma");
+
   const requestedSectionId = searchParams?.sectionId;
 
   const requestedSection = requestedSectionId

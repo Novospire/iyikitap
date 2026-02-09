@@ -41,6 +41,23 @@ npm run prisma:migrate
 npm run dev
 ```
 
+6. Environment variables (required)
+
+**Local**
+- Create `.env` (you can copy from `.env.example`)
+- Set `DATABASE_URL`
+- Run:
+
+```bash
+npx prisma generate
+# if you have pending migrations:
+npx prisma migrate dev
+```
+
+**Preview / Production (Vercel)**
+- Add `DATABASE_URL` to Vercel → Project Settings → Environment Variables
+- If `DATABASE_URL` is missing, `/admin/import` will show **“Setup required”** instead of crashing.
+
 ## Demo: Google Books import
 
 1. Admin import sayfasına gidin:
