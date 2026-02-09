@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
-import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
+
+const GOOGLE_BOOKS_ENDPOINT = "https://www.googleapis.com/books/v1/volumes";
+const ISBN_13_REGEX = /^\\d{13}$/;
 
 export default async function Page({
   params,
@@ -18,11 +20,57 @@ export default async function Page({
     include: {
       expert: true,
       categories: { include: { category: true } },
-      sections: { include: { items: true } },
+      sections: { include: { items: { orderBy: { order: "asc" } } } },
     },
   });
 
   if (!list) return notFound();
+
+  const itemsForLookup = Array.from(
+    new Set(
+      list.sections
+        .flatMap((section) => section.items)
+        .map((item) => item.asin.trim())
+        .filter(
+          (asin) => asin && (ISBN_13_REGEX.test(asin) || asin.length !== 10),
+        ),
+    ),
+  );
+
+  const googleInfoEntries = await Promise.all(
+    itemsForLookup.map(async (asin) => {
+      try {
+        const url = new URL(GOOGLE_BOOKS_ENDPOINT);
+
+        if (ISBN_13_REGEX.test(asin)) {
+          url.searchParams.set("q", `isbn:${asin}`);
+        } else {
+          url.pathname = `${url.pathname}/${asin}`;
+        }
+
+        const response = await fetch(url.toString(), { next: { revalidate: 60 } });
+
+        if (!response.ok) return [asin, null] as const;
+
+        const data = (await response.json()) as {
+          items?: Array<{ volumeInfo?: { infoLink?: string } }>;
+          volumeInfo?: { infoLink?: string };
+        };
+
+        const infoLink =
+          data.volumeInfo?.infoLink ?? data.items?.[0]?.volumeInfo?.infoLink ?? null;
+
+        return [asin, infoLink] as const;
+      } catch (error) {
+        console.error("Failed to fetch Google Books info link", error);
+        return [asin, null] as const;
+      }
+    }),
+  );
+
+  const googleInfoLinks = new Map(
+    googleInfoEntries.filter(([, infoLink]) => Boolean(infoLink)),
+  );
 
   return (
     <main className="mx-auto max-w-5xl px-6 py-10">
@@ -44,11 +92,15 @@ export default async function Page({
                   <div className="font-medium">{it.titleOverride ?? it.asin}</div>
                   <a
                     className="mt-2 inline-block underline"
-                    href={`https://www.amazon.com.tr/dp/${it.asin}`}
+                    href={
+                      (it as { infoLink?: string | null }).infoLink ??
+                      googleInfoLinks.get(it.asin) ??
+                      `https://www.amazon.com.tr/dp/${it.asin}`
+                    }
                     target="_blank"
                     rel="noreferrer"
                   >
-                    Amazon&apos;da gör
+                    Detay
                   </a>
                 </li>
               ))}
