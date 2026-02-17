@@ -16,7 +16,14 @@ export async function GET(
   _request: Request,
   { params }: { params: { itemId: string } },
 ) {
+  const databaseUrl = process.env.DATABASE_URL?.trim();
   const associateTag = process.env.AMAZON_ASSOCIATE_TAG?.trim();
+
+  if (!databaseUrl) {
+    return new NextResponse("Setup required: DATABASE_URL is not configured.", {
+      status: 503,
+    });
+  }
 
   if (!associateTag) {
     return new NextResponse("Setup required: AMAZON_ASSOCIATE_TAG is not configured.", {
