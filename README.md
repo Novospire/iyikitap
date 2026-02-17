@@ -60,6 +60,12 @@ npx prisma migrate dev
 - Add `DATABASE_URL` to Vercel → Project Settings → Environment Variables
 - If `DATABASE_URL` is missing, `/admin/import` will show **“Setup required”** instead of crashing.
 
+## Amazon redirect route (`/go/[itemId]`)
+
+- `GET /go/[itemId]` looks up the item in Prisma and redirects to Amazon TR with your affiliate tag.
+- Required env: `AMAZON_ASSOCIATE_TAG`.
+- If the tag is missing, the route returns **Setup required** instead of crashing.
+
 > This does not mean the app is DB-less. It only prevents crashes when DATABASE_URL is missing. Admin/DB-backed pages still require a database.
 
 ## Demo: Google Books import
