@@ -3,6 +3,10 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 
 const SECTION_ITEM_LIMIT = 5;
+const ASIN_PATTERN = /^[A-Z0-9]{10}$/;
+
+const hasConfiguredAsin = (asin: string | null | undefined) =>
+  Boolean(asin?.trim()) && ASIN_PATTERN.test(asin.trim().toUpperCase());
 
 const placeholderFromText = (value: string) =>
   value
@@ -120,6 +124,15 @@ export default async function HomePage() {
               <p className="font-semibold">{item.titleOverride ?? item.asin}</p>
               <p className="text-sm text-slate-600">{item.authorOverride ?? "Yazar bilgisi yok"}</p>
               <p className="mt-1 text-sm text-slate-500">{item.noteShort ?? "Not bulunamadı."}</p>
+              {hasConfiguredAsin(item.asin) ? (
+                <Link href={`/go/${item.id}`} className="mt-3 inline-block text-sm font-medium underline">
+                  Amazon&apos;da Gör
+                </Link>
+              ) : (
+                <p className="mt-3 inline-block rounded border border-slate-300 bg-slate-100 px-2 py-1 text-sm text-slate-500">
+                  Link not configured
+                </p>
+              )}
             </li>
           ))}
         </ul>
@@ -149,6 +162,13 @@ export default async function HomePage() {
                 Görsel yok
               </div>
               <p className="text-sm font-semibold">{item.titleOverride ?? item.asin}</p>
+              {hasConfiguredAsin(item.asin) ? (
+                <Link href={`/go/${item.id}`} className="mt-2 inline-block text-sm font-medium underline">
+                  Amazon&apos;da Gör
+                </Link>
+              ) : (
+                <p className="mt-2 text-sm text-slate-500">Link not configured</p>
+              )}
             </li>
           ))}
         </ul>
@@ -163,6 +183,13 @@ export default async function HomePage() {
                 Görsel yok
               </div>
               <p className="text-sm font-semibold">{item.titleOverride ?? item.asin}</p>
+              {hasConfiguredAsin(item.asin) ? (
+                <Link href={`/go/${item.id}`} className="mt-2 inline-block text-sm font-medium underline">
+                  Amazon&apos;da Gör
+                </Link>
+              ) : (
+                <p className="mt-2 text-sm text-slate-500">Link not configured</p>
+              )}
             </li>
           ))}
         </ul>
@@ -180,6 +207,13 @@ export default async function HomePage() {
                   <li key={item.id} className="rounded-lg border p-2 text-sm">
                     <p className="font-semibold">{index + 1}. {item.titleOverride ?? item.asin}</p>
                     <p className="text-xs text-slate-500">{item.authorOverride ?? "Yazar bilgisi yok"}</p>
+                    {hasConfiguredAsin(item.asin) ? (
+                      <Link href={`/go/${item.id}`} className="mt-2 inline-block text-sm font-medium underline">
+                        Amazon&apos;da Gör
+                      </Link>
+                    ) : (
+                      <p className="mt-2 text-xs text-slate-500">Link not configured</p>
+                    )}
                   </li>
                 ))}
               </ol>
