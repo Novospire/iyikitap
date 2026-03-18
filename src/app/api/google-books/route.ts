@@ -60,14 +60,15 @@ export async function GET(request: NextRequest) {
   }
 
   const response = await fetch(endpoint.toString(), {
-    next: { revalidate: 60 },
+    cache: "no-store",
   });
 
   if (!response.ok) {
-    let upstreamMessage = "Google Books request failed.";
+    let upstreamMessage = response.statusText || "Google Books request failed.";
 
     try {
-      const upstreamPayload = (await response.json()) as {
+      const upstreamText = await response.text();
+      const upstreamPayload = (upstreamText ? JSON.parse(upstreamText) : {}) as {
         error?: {
           message?: string;
         };

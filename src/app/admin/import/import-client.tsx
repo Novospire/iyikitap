@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 
 type GoogleBooksItem = {
   title: string;
@@ -55,8 +55,6 @@ export default function ImportClient({
   const [currentAsinById, setCurrentAsinById] = useState<Record<string, string>>(() => {
     return Object.fromEntries(sectionItems.map((item) => [item.id, item.asin ?? ""]));
   });
-  const searchInFlightRef = useRef(false);
-  const lastSearchStartedAtRef = useRef(0);
 
   const sectionLabel = useMemo(() => {
     if (!section) return "";
@@ -64,12 +62,7 @@ export default function ImportClient({
   }, [section]);
 
   const handleSearch = async () => {
-    if (searchInFlightRef.current || isLoading) {
-      return;
-    }
-
-    const now = Date.now();
-    if (now - lastSearchStartedAtRef.current < 500) {
+    if (isLoading) {
       return;
     }
 
@@ -82,8 +75,6 @@ export default function ImportClient({
       return;
     }
 
-    searchInFlightRef.current = true;
-    lastSearchStartedAtRef.current = now;
     setIsLoading(true);
     setSearchError(null);
     setHasSearched(true);
@@ -92,10 +83,10 @@ export default function ImportClient({
       const response = await fetch(
         `/api/google-books?q=${encodeURIComponent(trimmed)}&max=20`,
       );
-      const data = (await response.json()) as {
+      const payloadText = await response.text();
+      const data = (payloadText ? JSON.parse(payloadText) : {}) as {
         items?: GoogleBooksItem[];
         error?: string;
-        status?: number;
       };
 
       if (!response.ok) {
@@ -118,7 +109,6 @@ export default function ImportClient({
       setSearchError("Google Books sonuçları alınamadı.");
       setResults([]);
     } finally {
-      searchInFlightRef.current = false;
       setIsLoading(false);
     }
   };
