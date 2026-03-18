@@ -45,6 +45,7 @@ model ListSection {
 model ListItem {
   id             String      @id @default(uuid())
   asin           String
+  coverImageUrl  String?
   titleOverride  String?
   authorOverride String?
   noteShort      String?
