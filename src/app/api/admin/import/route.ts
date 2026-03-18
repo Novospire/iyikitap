@@ -6,6 +6,7 @@ type ImportPayload = {
   sectionId: string;
   title: string;
   authors?: string[];
+  coverImageUrl?: string | null;
   isbn13?: string | null;
   googleBooksId?: string;
   infoLink?: string;
@@ -60,6 +61,7 @@ export async function POST(request: NextRequest) {
   const item = await prisma.listItem.create({
     data: {
       asin,
+      coverImageUrl: payload.coverImageUrl?.trim() || null,
       titleOverride: payload.title,
       authorOverride,
       sectionId: payload.sectionId,
