@@ -53,14 +53,39 @@ export async function GET(request: NextRequest) {
   const endpoint = new URL(GOOGLE_BOOKS_ENDPOINT);
   endpoint.searchParams.set("q", query);
   endpoint.searchParams.set("maxResults", String(maxResults));
+  const apiKey = process.env.GOOGLE_BOOKS_API_KEY?.trim();
+
+  if (apiKey) {
+    endpoint.searchParams.set("key", apiKey);
+  }
 
   const response = await fetch(endpoint.toString(), {
     next: { revalidate: 60 },
   });
 
   if (!response.ok) {
+    let upstreamMessage = "Google Books request failed.";
+
+    try {
+      const upstreamPayload = (await response.json()) as {
+        error?: {
+          message?: string;
+        };
+      };
+
+      if (upstreamPayload.error?.message) {
+        upstreamMessage = upstreamPayload.error.message;
+      }
+    } catch {
+      // Ignore JSON parsing failures and keep fallback message.
+    }
+
     return NextResponse.json(
-      { items: [], error: "Google Books request failed." },
+      {
+        error: upstreamMessage,
+        status: response.status,
+        source: "google-books",
+      },
       { status: response.status },
     );
   }

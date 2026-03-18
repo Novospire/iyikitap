@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 type GoogleBooksItem = {
   title: string;
@@ -43,6 +43,8 @@ export default function ImportClient({
   const [results, setResults] = useState<GoogleBooksItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const [hasSearched, setHasSearched] = useState(false);
   const [addingIds, setAddingIds] = useState<string[]>([]);
   const [addedIds, setAddedIds] = useState<string[]>([]);
   const [savingIds, setSavingIds] = useState<string[]>([]);
@@ -53,6 +55,8 @@ export default function ImportClient({
   const [currentAsinById, setCurrentAsinById] = useState<Record<string, string>>(() => {
     return Object.fromEntries(sectionItems.map((item) => [item.id, item.asin ?? ""]));
   });
+  const searchInFlightRef = useRef(false);
+  const lastSearchStartedAtRef = useRef(0);
 
   const sectionLabel = useMemo(() => {
     if (!section) return "";
@@ -60,26 +64,61 @@ export default function ImportClient({
   }, [section]);
 
   const handleSearch = async () => {
-    const trimmed = query.trim();
-
-    if (!trimmed) {
-      setError("Lütfen bir arama terimi girin.");
+    if (searchInFlightRef.current || isLoading) {
       return;
     }
 
+    const now = Date.now();
+    if (now - lastSearchStartedAtRef.current < 500) {
+      return;
+    }
+
+    const trimmed = query.trim();
+
+    if (!trimmed) {
+      setSearchError("Lütfen bir arama terimi girin.");
+      setResults([]);
+      setHasSearched(false);
+      return;
+    }
+
+    searchInFlightRef.current = true;
+    lastSearchStartedAtRef.current = now;
     setIsLoading(true);
-    setError(null);
+    setSearchError(null);
+    setHasSearched(true);
 
     try {
       const response = await fetch(
         `/api/google-books?q=${encodeURIComponent(trimmed)}&max=20`,
       );
-      const data = (await response.json()) as { items: GoogleBooksItem[] };
+      const data = (await response.json()) as {
+        items?: GoogleBooksItem[];
+        error?: string;
+        status?: number;
+      };
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          setSearchError(
+            data.error ??
+              "Google Books istek limiti aşıldı (429). Lütfen kısa süre sonra tekrar deneyin.",
+          );
+        } else {
+          setSearchError(data.error ?? "Google Books sonuçları alınamadı.");
+        }
+        setResults([]);
+        return;
+      }
+
+      setSearchError(null);
       setResults(data.items ?? []);
     } catch (err) {
       console.error(err);
-      setError("Google Books sonuçları alınamadı.");
+      setSearchError("Google Books sonuçları alınamadı.");
+      setResults([]);
     } finally {
+      searchInFlightRef.current = false;
       setIsLoading(false);
     }
   };
@@ -217,14 +256,21 @@ export default function ImportClient({
             {isLoading ? "Aranıyor..." : "Search"}
           </button>
         </div>
+        {searchError ? <p className="mt-3 text-sm text-red-600">{searchError}</p> : null}
         {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
       </section>
 
       <section className="space-y-4">
         <h2 className="text-lg font-semibold">Sonuçlar</h2>
-        {results.length === 0 ? (
+        {searchError ? (
+          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            Arama başarısız oldu. Lütfen hatayı giderip tekrar deneyin.
+          </div>
+        ) : results.length === 0 ? (
           <p className="text-sm opacity-70">
-            Henüz sonuç yok. Arama yaptıktan sonra listelenecek.
+            {hasSearched
+              ? "Arama tamamlandı ancak sonuç bulunamadı."
+              : "Henüz sonuç yok. Arama yaptıktan sonra listelenecek."}
           </p>
         ) : (
           <ul className="space-y-3">
