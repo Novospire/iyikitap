@@ -101,6 +101,7 @@ export default function ImportClient({
           sectionId: section.id,
           title: item.title,
           authors: item.authors,
+          coverImageUrl: item.thumbnail || null,
           isbn13: item.isbn13,
           googleBooksId: item.googleBooksId,
           infoLink: item.infoLink,

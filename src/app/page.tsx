@@ -166,9 +166,17 @@ export default async function HomePage() {
         <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
           {topRecommendedItems.slice(0, SECTION_ITEM_LIMIT).map((item) => (
             <li key={item.id} className="rounded-xl border bg-white p-3">
-              <div className="mb-2 flex h-24 items-center justify-center rounded bg-slate-100 text-xs text-slate-500">
-                Görsel yok
-              </div>
+              {item.coverImageUrl ? (
+                <img
+                  src={item.coverImageUrl}
+                  alt={item.titleOverride ?? item.asin}
+                  className="mb-2 h-24 w-full rounded bg-slate-100 object-cover"
+                />
+              ) : (
+                <div className="mb-2 flex h-24 items-center justify-center rounded bg-slate-100 text-xs text-slate-500">
+                  Görsel yok
+                </div>
+              )}
               <p className="text-sm font-semibold">{item.titleOverride ?? item.asin}</p>
               {hasConfiguredAsin(item.asin) ? (
                 <Link href={`/go/${item.id}`} className="mt-2 inline-block text-sm font-medium underline">
@@ -187,9 +195,17 @@ export default async function HomePage() {
         <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
           {similarBooksItems.slice(0, SECTION_ITEM_LIMIT).map((item) => (
             <li key={item.id} className="rounded-xl border bg-white p-3">
-              <div className="mb-2 flex h-24 items-center justify-center rounded bg-slate-100 text-xs text-slate-500">
-                Görsel yok
-              </div>
+              {item.coverImageUrl ? (
+                <img
+                  src={item.coverImageUrl}
+                  alt={item.titleOverride ?? item.asin}
+                  className="mb-2 h-24 w-full rounded bg-slate-100 object-cover"
+                />
+              ) : (
+                <div className="mb-2 flex h-24 items-center justify-center rounded bg-slate-100 text-xs text-slate-500">
+                  Görsel yok
+                </div>
+              )}
               <p className="text-sm font-semibold">{item.titleOverride ?? item.asin}</p>
               {hasConfiguredAsin(item.asin) ? (
                 <Link href={`/go/${item.id}`} className="mt-2 inline-block text-sm font-medium underline">

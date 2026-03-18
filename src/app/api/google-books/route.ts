@@ -13,6 +13,7 @@ type GoogleBooksVolume = {
     infoLink?: string;
     imageLinks?: {
       thumbnail?: string;
+      smallThumbnail?: string;
     };
     industryIdentifiers?: Array<{
       type?: string;
@@ -30,7 +31,7 @@ const normalizeVolume = (volume: GoogleBooksVolume) => {
     title: info.title ?? "",
     authors: info.authors ?? [],
     publishedDate: info.publishedDate ?? "",
-    thumbnail: info.imageLinks?.thumbnail ?? "",
+    thumbnail: info.imageLinks?.thumbnail ?? info.imageLinks?.smallThumbnail ?? "",
     isbn13: isbn13 ?? null,
     googleBooksId: volume.id,
     infoLink: info.infoLink ?? "",
