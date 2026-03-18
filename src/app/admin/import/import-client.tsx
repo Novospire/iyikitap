@@ -12,13 +12,26 @@ type GoogleBooksItem = {
   infoLink: string;
 };
 
+type SectionItem = {
+  id: string;
+  asin: string;
+  titleOverride: string | null;
+  authorOverride: string | null;
+};
+
 type ImportClientProps = {
   section: {
     id: string;
     title: string;
     listTitle: string;
+    items: SectionItem[];
   } | null;
   requestedSectionId?: string | null;
+};
+
+type SaveStatus = {
+  type: "saved" | "error";
+  message: string;
 };
 
 export default function ImportClient({
@@ -31,6 +44,16 @@ export default function ImportClient({
   const [error, setError] = useState<string | null>(null);
   const [addingIds, setAddingIds] = useState<string[]>([]);
   const [addedIds, setAddedIds] = useState<string[]>([]);
+  const [savingIds, setSavingIds] = useState<string[]>([]);
+  const [saveStatusById, setSaveStatusById] = useState<Record<string, SaveStatus>>({});
+  const [asinById, setAsinById] = useState<Record<string, string>>(() => {
+    if (!section) return {};
+    return Object.fromEntries(section.items.map((item) => [item.id, item.asin ?? ""]));
+  });
+  const [currentAsinById, setCurrentAsinById] = useState<Record<string, string>>(() => {
+    if (!section) return {};
+    return Object.fromEntries(section.items.map((item) => [item.id, item.asin ?? ""]));
+  });
 
   const sectionLabel = useMemo(() => {
     if (!section) return "";
@@ -98,6 +121,58 @@ export default function ImportClient({
     }
   };
 
+  const handleAsinChange = (itemId: string, value: string) => {
+    setAsinById((prev) => ({ ...prev, [itemId]: value }));
+    setSaveStatusById((prev) => {
+      if (!prev[itemId]) return prev;
+      const next = { ...prev };
+      delete next[itemId];
+      return next;
+    });
+  };
+
+  const handleAsinSave = async (itemId: string) => {
+    const asin = (asinById[itemId] ?? "").trim();
+
+    setSavingIds((prev) => [...prev, itemId]);
+    setSaveStatusById((prev) => {
+      if (!prev[itemId]) return prev;
+      const next = { ...prev };
+      delete next[itemId];
+      return next;
+    });
+
+    try {
+      const response = await fetch(`/api/admin/list-items/${itemId}/asin`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ asin }),
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json()) as { error?: string };
+        throw new Error(payload.error ?? "ASIN güncellenemedi.");
+      }
+
+      setCurrentAsinById((prev) => ({ ...prev, [itemId]: asin }));
+      setAsinById((prev) => ({ ...prev, [itemId]: asin }));
+      setSaveStatusById((prev) => ({
+        ...prev,
+        [itemId]: { type: "saved", message: "Saved" },
+      }));
+    } catch (err) {
+      setSaveStatusById((prev) => ({
+        ...prev,
+        [itemId]: {
+          type: "error",
+          message: err instanceof Error ? err.message : "ASIN güncellenemedi.",
+        },
+      }));
+    } finally {
+      setSavingIds((prev) => prev.filter((id) => id !== itemId));
+    }
+  };
+
   return (
     <main className="mx-auto flex max-w-5xl flex-col gap-6 px-6 py-10">
       <header className="space-y-2">
@@ -121,6 +196,74 @@ export default function ImportClient({
           </div>
         )}
       </header>
+
+      {section ? (
+        <section className="space-y-4 rounded-2xl border p-4">
+          <h2 className="text-lg font-semibold">Section items (ASIN editor)</h2>
+          {section.items.length === 0 ? (
+            <p className="text-sm opacity-70">Bu bölümde henüz öğe yok.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b">
+                    <th className="px-2 py-2">Title</th>
+                    <th className="px-2 py-2">Author</th>
+                    <th className="px-2 py-2">Current ASIN</th>
+                    <th className="px-2 py-2">Edit ASIN</th>
+                    <th className="px-2 py-2">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {section.items.map((item) => {
+                    const isSaving = savingIds.includes(item.id);
+                    const status = saveStatusById[item.id];
+
+                    return (
+                      <tr key={item.id} className="border-b align-top">
+                        <td className="px-2 py-3">{item.titleOverride?.trim() || "(No title override)"}</td>
+                        <td className="px-2 py-3">{item.authorOverride?.trim() || "(No author override)"}</td>
+                        <td className="px-2 py-3">{currentAsinById[item.id]?.trim() || "—"}</td>
+                        <td className="px-2 py-3">
+                          <input
+                            className="w-52 rounded border px-2 py-1"
+                            value={asinById[item.id] ?? ""}
+                            onChange={(event) => handleAsinChange(item.id, event.target.value)}
+                            placeholder="ASIN"
+                          />
+                        </td>
+                        <td className="px-2 py-3">
+                          <div className="flex flex-col items-start gap-1">
+                            <button
+                              className="rounded-lg border px-3 py-1.5 text-sm font-medium disabled:opacity-50"
+                              type="button"
+                              disabled={isSaving}
+                              onClick={() => handleAsinSave(item.id)}
+                            >
+                              {isSaving ? "Saving..." : "Save"}
+                            </button>
+                            {status ? (
+                              <span
+                                className={
+                                  status.type === "saved"
+                                    ? "text-xs text-green-700"
+                                    : "text-xs text-red-600"
+                                }
+                              >
+                                {status.message}
+                              </span>
+                            ) : null}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      ) : null}
 
       <section className="rounded-2xl border p-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-end">
