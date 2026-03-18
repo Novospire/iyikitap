@@ -121,7 +121,7 @@ export default async function HomePage() {
         <ul className="mt-4 grid gap-3 md:grid-cols-2">
           {latestRecommendedItems.map((item) => (
             <li key={item.id}>
-              {hasConfiguredAsin(item.asin) ? (
+              {item.asin.trim().length > 0 ? (
                 <Link
                   href={`/go/${item.id}`}
                   className="block rounded-lg border bg-white p-3 transition hover:border-slate-400"
