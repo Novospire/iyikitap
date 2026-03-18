@@ -20,12 +20,10 @@ function SetupRequired() {
 }
 
 export default async function ImportPage({ searchParams }: ImportPageProps) {
-  // GUARD: env yoksa Prisma'ya dokunma
   if (!process.env.DATABASE_URL) {
     return <SetupRequired />;
   }
 
-  // Env varsa Prisma'yı dinamik import et
   const { prisma } = await import("@/lib/prisma");
 
   const requestedSectionId = searchParams?.sectionId;
@@ -33,14 +31,40 @@ export default async function ImportPage({ searchParams }: ImportPageProps) {
   const requestedSection = requestedSectionId
     ? await prisma.listSection.findUnique({
         where: { id: requestedSectionId },
-        include: { list: true },
+        include: {
+          list: true,
+          items: {
+            orderBy: [{ order: "asc" }, { createdAt: "asc" }, { id: "asc" }],
+            select: {
+              id: true,
+              asin: true,
+              titleOverride: true,
+              authorOverride: true,
+              noteShort: true,
+              order: true,
+            },
+          },
+        },
       })
     : null;
 
   const fallbackSection = !requestedSection
     ? await prisma.listSection.findFirst({
         orderBy: [{ createdAt: "asc" }, { id: "asc" }],
-        include: { list: true },
+        include: {
+          list: true,
+          items: {
+            orderBy: [{ order: "asc" }, { createdAt: "asc" }, { id: "asc" }],
+            select: {
+              id: true,
+              asin: true,
+              titleOverride: true,
+              authorOverride: true,
+              noteShort: true,
+              order: true,
+            },
+          },
+        },
       })
     : null;
 
@@ -54,9 +78,12 @@ export default async function ImportPage({ searchParams }: ImportPageProps) {
       }
     : null;
 
+  const sectionItems = section?.items ?? [];
+
   return (
     <ImportClient
       section={sectionPayload}
+      sectionItems={sectionItems}
       requestedSectionId={requestedSectionId ?? null}
     />
   );
