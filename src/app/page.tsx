@@ -120,18 +120,26 @@ export default async function HomePage() {
         <h2 className="text-lg font-semibold">SON ÖNERİLEN KİTAPLAR</h2>
         <ul className="mt-4 grid gap-3 md:grid-cols-2">
           {latestRecommendedItems.map((item) => (
-            <li key={item.id} className="rounded-lg border bg-white p-3">
-              <p className="font-semibold">{item.titleOverride ?? item.asin}</p>
-              <p className="text-sm text-slate-600">{item.authorOverride ?? "Yazar bilgisi yok"}</p>
-              <p className="mt-1 text-sm text-slate-500">{item.noteShort ?? "Not bulunamadı."}</p>
+            <li key={item.id}>
               {hasConfiguredAsin(item.asin) ? (
-                <Link href={`/go/${item.id}`} className="mt-3 inline-block text-sm font-medium underline">
-                  Amazon&apos;da Gör
+                <Link
+                  href={`/go/${item.id}`}
+                  className="block rounded-lg border bg-white p-3 transition hover:border-slate-400"
+                >
+                  <p className="font-semibold">{item.titleOverride ?? item.asin}</p>
+                  <p className="text-sm text-slate-600">{item.authorOverride ?? "Yazar bilgisi yok"}</p>
+                  <p className="mt-1 text-sm text-slate-500">{item.noteShort ?? "Not bulunamadı."}</p>
+                  <p className="mt-3 text-sm font-medium underline">Amazon&apos;da Gör</p>
                 </Link>
               ) : (
-                <p className="mt-3 inline-block rounded border border-slate-300 bg-slate-100 px-2 py-1 text-sm text-slate-500">
-                  Link not configured
-                </p>
+                <div className="rounded-lg border bg-white p-3">
+                  <p className="font-semibold">{item.titleOverride ?? item.asin}</p>
+                  <p className="text-sm text-slate-600">{item.authorOverride ?? "Yazar bilgisi yok"}</p>
+                  <p className="mt-1 text-sm text-slate-500">{item.noteShort ?? "Not bulunamadı."}</p>
+                  <p className="mt-3 inline-block rounded border border-slate-300 bg-slate-100 px-2 py-1 text-sm text-slate-500">
+                    Link not configured
+                  </p>
+                </div>
               )}
             </li>
           ))}
