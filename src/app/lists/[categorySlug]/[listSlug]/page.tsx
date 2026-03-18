@@ -1,10 +1,12 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { prisma } from "@/lib/prisma";
 
-const GOOGLE_BOOKS_ENDPOINT = "https://www.googleapis.com/books/v1/volumes";
-const ISBN_13_REGEX = /^\\d{13}$/;
-type ListItemWithInfoLink = { infoLink?: string | null };
+const ASIN_PATTERN = /^[A-Z0-9]{10}$/;
+
+const hasConfiguredAsin = (asin: string | null | undefined) =>
+  Boolean(asin?.trim()) && ASIN_PATTERN.test(asin.trim().toUpperCase());
 
 export default async function Page({
   params,
@@ -27,55 +29,6 @@ export default async function Page({
 
   if (!list) return notFound();
 
-  const itemsForLookup = Array.from(
-    new Set(
-      list.sections
-        .flatMap((section) => section.items)
-        .filter(
-          (item) =>
-            !("infoLink" in item) ||
-            !((item as ListItemWithInfoLink).infoLink ?? null),
-        )
-        .map((item) => item.asin.trim())
-        .filter((asin) => asin.length > 0),
-    ),
-  );
-
-  const googleInfoEntries = await Promise.all(
-    itemsForLookup.map(async (asin) => {
-      try {
-        const url = new URL(GOOGLE_BOOKS_ENDPOINT);
-
-        if (ISBN_13_REGEX.test(asin)) {
-          url.searchParams.set("q", `isbn:${asin}`);
-        } else {
-          url.pathname = `${url.pathname}/${asin}`;
-        }
-
-        const response = await fetch(url.toString(), { next: { revalidate: 60 } });
-
-        if (!response.ok) return [asin, null] as const;
-
-        const data = (await response.json()) as {
-          items?: Array<{ volumeInfo?: { infoLink?: string } }>;
-          volumeInfo?: { infoLink?: string };
-        };
-
-        const infoLink =
-          data.volumeInfo?.infoLink ?? data.items?.[0]?.volumeInfo?.infoLink ?? null;
-
-        return [asin, infoLink] as const;
-      } catch (error) {
-        console.error("Failed to fetch Google Books info link", error);
-        return [asin, null] as const;
-      }
-    }),
-  );
-
-  const googleInfoLinks = new Map(
-    googleInfoEntries.filter(([, infoLink]) => Boolean(infoLink)),
-  );
-
   return (
     <main className="mx-auto max-w-5xl px-6 py-10">
       <h1 className="text-3xl font-semibold">{list.title}</h1>
@@ -94,20 +47,13 @@ export default async function Page({
               {sec.items.map((it) => (
                 <li key={it.id} className="rounded-xl border p-4">
                   <div className="font-medium">{it.titleOverride ?? it.asin}</div>
-                  <a
-                    className="mt-2 inline-block underline"
-                    href={
-                      ("infoLink" in it
-                        ? (it as ListItemWithInfoLink).infoLink
-                        : null) ??
-                      googleInfoLinks.get(it.asin) ??
-                      `https://www.amazon.com.tr/dp/${it.asin}`
-                    }
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Detay
-                  </a>
+                  {hasConfiguredAsin(it.asin) ? (
+                    <Link href={`/go/${it.id}`} className="mt-2 inline-block underline">
+                      Amazon&apos;da Gör
+                    </Link>
+                  ) : (
+                    <p className="mt-2 text-sm text-slate-500">Link not configured</p>
+                  )}
                 </li>
               ))}
             </ul>
