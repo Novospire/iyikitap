@@ -33,7 +33,17 @@ export default async function ImportPage({ searchParams }: ImportPageProps) {
         where: { id: requestedSectionId },
         include: {
           list: true,
-          items: true,
+          items: {
+            orderBy: [{ order: "asc" }, { createdAt: "asc" }, { id: "asc" }],
+            select: {
+              id: true,
+              asin: true,
+              titleOverride: true,
+              authorOverride: true,
+              noteShort: true,
+              order: true,
+            },
+          },
         },
       })
     : null;
@@ -43,7 +53,17 @@ export default async function ImportPage({ searchParams }: ImportPageProps) {
         orderBy: [{ createdAt: "asc" }, { id: "asc" }],
         include: {
           list: true,
-          items: true,
+          items: {
+            orderBy: [{ order: "asc" }, { createdAt: "asc" }, { id: "asc" }],
+            select: {
+              id: true,
+              asin: true,
+              titleOverride: true,
+              authorOverride: true,
+              noteShort: true,
+              order: true,
+            },
+          },
         },
       })
     : null;
@@ -55,23 +75,15 @@ export default async function ImportPage({ searchParams }: ImportPageProps) {
         id: section.id,
         title: section.title,
         listTitle: section.list.title,
-        items: section.items
-          .sort((a, b) => {
-            if (a.order !== b.order) return a.order - b.order;
-            return a.createdAt.getTime() - b.createdAt.getTime();
-          })
-          .map((item) => ({
-            id: item.id,
-            asin: item.asin,
-            titleOverride: item.titleOverride,
-            authorOverride: item.authorOverride,
-          })),
       }
     : null;
+
+  const sectionItems = section?.items ?? [];
 
   return (
     <ImportClient
       section={sectionPayload}
+      sectionItems={sectionItems}
       requestedSectionId={requestedSectionId ?? null}
     />
   );

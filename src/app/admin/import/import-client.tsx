@@ -24,8 +24,8 @@ type ImportClientProps = {
     id: string;
     title: string;
     listTitle: string;
-    items: SectionItem[];
   } | null;
+  sectionItems: SectionItem[];
   requestedSectionId?: string | null;
 };
 
@@ -36,6 +36,7 @@ type SaveStatus = {
 
 export default function ImportClient({
   section,
+  sectionItems,
   requestedSectionId,
 }: ImportClientProps) {
   const [query, setQuery] = useState("");
@@ -47,12 +48,10 @@ export default function ImportClient({
   const [savingIds, setSavingIds] = useState<string[]>([]);
   const [saveStatusById, setSaveStatusById] = useState<Record<string, SaveStatus>>({});
   const [asinById, setAsinById] = useState<Record<string, string>>(() => {
-    if (!section) return {};
-    return Object.fromEntries(section.items.map((item) => [item.id, item.asin ?? ""]));
+    return Object.fromEntries(sectionItems.map((item) => [item.id, item.asin ?? ""]));
   });
   const [currentAsinById, setCurrentAsinById] = useState<Record<string, string>>(() => {
-    if (!section) return {};
-    return Object.fromEntries(section.items.map((item) => [item.id, item.asin ?? ""]));
+    return Object.fromEntries(sectionItems.map((item) => [item.id, item.asin ?? ""]));
   });
 
   const sectionLabel = useMemo(() => {
@@ -277,12 +276,12 @@ export default function ImportClient({
       </section>
 
       <section className="space-y-4 rounded-2xl border p-4">
-        <h2 className="text-lg font-semibold">Section items</h2>
+        <h2 className="text-lg font-semibold">Bölümdeki kitaplar</h2>
         {!section ? (
           <p className="text-sm text-red-700">
             Seçili bölüm bulunamadı, bu yüzden ASIN düzenlenemiyor.
           </p>
-        ) : section.items.length === 0 ? (
+        ) : sectionItems.length === 0 ? (
           <p className="text-sm opacity-70">Bu bölümde henüz öğe yok.</p>
         ) : (
           <div className="overflow-x-auto">
@@ -290,19 +289,21 @@ export default function ImportClient({
               <thead>
                 <tr className="border-b">
                   <th className="px-2 py-2">Title</th>
+                  <th className="px-2 py-2">Author</th>
                   <th className="px-2 py-2">Current ASIN</th>
                   <th className="px-2 py-2">Edit ASIN</th>
                   <th className="px-2 py-2">Action</th>
                 </tr>
               </thead>
               <tbody>
-                {section.items.map((item) => {
+                {sectionItems.map((item) => {
                   const isSaving = savingIds.includes(item.id);
                   const status = saveStatusById[item.id];
 
                   return (
                     <tr key={item.id} className="border-b align-top">
-                      <td className="px-2 py-3">{item.titleOverride?.trim() || "(No title override)"}</td>
+                      <td className="px-2 py-3">{item.titleOverride?.trim() || "—"}</td>
+                      <td className="px-2 py-3">{item.authorOverride?.trim() || "—"}</td>
                       <td className="px-2 py-3">{currentAsinById[item.id]?.trim() || "—"}</td>
                       <td className="px-2 py-3">
                         <input
