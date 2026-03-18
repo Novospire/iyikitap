@@ -197,74 +197,6 @@ export default function ImportClient({
         )}
       </header>
 
-      {section ? (
-        <section className="space-y-4 rounded-2xl border p-4">
-          <h2 className="text-lg font-semibold">Section items (ASIN editor)</h2>
-          {section.items.length === 0 ? (
-            <p className="text-sm opacity-70">Bu bölümde henüz öğe yok.</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-left text-sm">
-                <thead>
-                  <tr className="border-b">
-                    <th className="px-2 py-2">Title</th>
-                    <th className="px-2 py-2">Author</th>
-                    <th className="px-2 py-2">Current ASIN</th>
-                    <th className="px-2 py-2">Edit ASIN</th>
-                    <th className="px-2 py-2">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {section.items.map((item) => {
-                    const isSaving = savingIds.includes(item.id);
-                    const status = saveStatusById[item.id];
-
-                    return (
-                      <tr key={item.id} className="border-b align-top">
-                        <td className="px-2 py-3">{item.titleOverride?.trim() || "(No title override)"}</td>
-                        <td className="px-2 py-3">{item.authorOverride?.trim() || "(No author override)"}</td>
-                        <td className="px-2 py-3">{currentAsinById[item.id]?.trim() || "—"}</td>
-                        <td className="px-2 py-3">
-                          <input
-                            className="w-52 rounded border px-2 py-1"
-                            value={asinById[item.id] ?? ""}
-                            onChange={(event) => handleAsinChange(item.id, event.target.value)}
-                            placeholder="ASIN"
-                          />
-                        </td>
-                        <td className="px-2 py-3">
-                          <div className="flex flex-col items-start gap-1">
-                            <button
-                              className="rounded-lg border px-3 py-1.5 text-sm font-medium disabled:opacity-50"
-                              type="button"
-                              disabled={isSaving}
-                              onClick={() => handleAsinSave(item.id)}
-                            >
-                              {isSaving ? "Saving..." : "Save"}
-                            </button>
-                            {status ? (
-                              <span
-                                className={
-                                  status.type === "saved"
-                                    ? "text-xs text-green-700"
-                                    : "text-xs text-red-600"
-                                }
-                              >
-                                {status.message}
-                              </span>
-                            ) : null}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>
-      ) : null}
-
       <section className="rounded-2xl border p-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-end">
           <label className="flex flex-1 flex-col gap-2">
@@ -341,6 +273,74 @@ export default function ImportClient({
               );
             })}
           </ul>
+        )}
+      </section>
+
+      <section className="space-y-4 rounded-2xl border p-4">
+        <h2 className="text-lg font-semibold">Section items</h2>
+        {!section ? (
+          <p className="text-sm text-red-700">
+            Seçili bölüm bulunamadı, bu yüzden ASIN düzenlenemiyor.
+          </p>
+        ) : section.items.length === 0 ? (
+          <p className="text-sm opacity-70">Bu bölümde henüz öğe yok.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-left text-sm">
+              <thead>
+                <tr className="border-b">
+                  <th className="px-2 py-2">Title</th>
+                  <th className="px-2 py-2">Current ASIN</th>
+                  <th className="px-2 py-2">Edit ASIN</th>
+                  <th className="px-2 py-2">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {section.items.map((item) => {
+                  const isSaving = savingIds.includes(item.id);
+                  const status = saveStatusById[item.id];
+
+                  return (
+                    <tr key={item.id} className="border-b align-top">
+                      <td className="px-2 py-3">{item.titleOverride?.trim() || "(No title override)"}</td>
+                      <td className="px-2 py-3">{currentAsinById[item.id]?.trim() || "—"}</td>
+                      <td className="px-2 py-3">
+                        <input
+                          className="w-52 rounded border px-2 py-1"
+                          value={asinById[item.id] ?? ""}
+                          onChange={(event) => handleAsinChange(item.id, event.target.value)}
+                          placeholder="ASIN"
+                        />
+                      </td>
+                      <td className="px-2 py-3">
+                        <div className="flex flex-col items-start gap-1">
+                          <button
+                            className="rounded-lg border px-3 py-1.5 text-sm font-medium disabled:opacity-50"
+                            type="button"
+                            disabled={isSaving}
+                            onClick={() => handleAsinSave(item.id)}
+                          >
+                            {isSaving ? "Saving..." : "Save"}
+                          </button>
+                          {status ? (
+                            <span
+                              className={
+                                status.type === "saved"
+                                  ? "text-xs text-green-700"
+                                  : "text-xs text-red-600"
+                              }
+                            >
+                              {status.message}
+                            </span>
+                          ) : null}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
     </main>
