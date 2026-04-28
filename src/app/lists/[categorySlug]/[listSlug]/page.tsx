@@ -45,15 +45,24 @@ export default async function Page({
             <h2 className="text-xl font-semibold">{sec.title}</h2>
             <ul className="mt-3 space-y-2">
               {sec.items.map((it) => (
-                <li key={it.id} className="rounded-xl border p-4">
-                  <div className="font-medium">{it.titleOverride ?? it.asin}</div>
-                  {hasConfiguredAsin(it.asin) ? (
-                    <Link href={`/go/${it.id}`} className="mt-2 inline-block underline">
-                      Amazon&apos;da Gör
-                    </Link>
-                  ) : (
-                    <p className="mt-2 text-sm text-slate-500">Link not configured</p>
-                  )}
+                <li key={it.id} className="flex gap-4 rounded-xl border p-4">
+                  {it.coverImageUrl ? (
+                    <img
+                      src={it.coverImageUrl}
+                      alt={it.titleOverride ?? ""}
+                      className="h-24 w-16 flex-shrink-0 rounded object-cover"
+                    />
+                  ) : null}
+                  <div>
+                    <div className="font-medium">{it.titleOverride ?? it.asin}</div>
+                    {hasConfiguredAsin(it.asin) ? (
+                      <Link href={`/go/${it.id}`} className="mt-2 inline-block underline">
+                        Amazon&apos;da Gör
+                      </Link>
+                    ) : (
+                      <p className="mt-2 text-sm text-slate-500">Link not configured</p>
+                    )}
+                  </div>
                 </li>
               ))}
             </ul>
