@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client";
 
-import { prisma } from "../src/lib/prisma.ts";
+import { prisma } from "../src/lib/prisma";
 
 const TOP_NAV_CATEGORY_NAMES = [
   "Edebiyat",
