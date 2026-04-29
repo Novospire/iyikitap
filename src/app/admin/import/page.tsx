@@ -1,3 +1,6 @@
+import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import ImportClient from "./import-client";
 
 type ImportPageProps = {
@@ -20,6 +23,12 @@ function SetupRequired() {
 }
 
 export default async function ImportPage({ searchParams }: ImportPageProps) {
+  const session = await getServerSession(authOptions);
+  
+  if (!session) {
+    redirect("/signin");
+  }
+
   if (!process.env.DATABASE_URL) {
     return <SetupRequired />;
   }
