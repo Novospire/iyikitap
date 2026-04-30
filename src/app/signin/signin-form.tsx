@@ -4,7 +4,7 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
-export default function SignInForm() {
+export default function SignInForm({ callbackUrl = "/admin/import" }: { callbackUrl?: string }) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,7 +27,7 @@ export default function SignInForm() {
     if (result?.error) {
       setError("E-posta veya şifre hatalı.");
     } else {
-      router.push("/admin/import");
+      router.replace(callbackUrl);
     }
   }
 
