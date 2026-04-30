@@ -5,8 +5,15 @@ import { prisma } from "@/lib/prisma";
 
 const ASIN_PATTERN = /^[A-Z0-9]{10}$/;
 
-const hasConfiguredAsin = (asin: string | null | undefined) =>
-  Boolean(asin?.trim()) && ASIN_PATTERN.test(asin.trim().toUpperCase());
+const hasConfiguredAsin = (asin: string | null | undefined) => {
+  const normalizedAsin = asin?.trim().toUpperCase();
+
+  if (!normalizedAsin) {
+    return false;
+  }
+
+  return ASIN_PATTERN.test(normalizedAsin);
+};
 
 export default async function Page({
   params,
