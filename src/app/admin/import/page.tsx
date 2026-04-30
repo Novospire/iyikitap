@@ -27,7 +27,7 @@ export default async function ImportPage({ searchParams }: ImportPageProps) {
   
   if (!session) {
     const callbackPath = searchParams?.sectionId 
-      ? `/admin/import?sectionId=${searchParams.sectionId}`
+      ? `/admin/import?sectionId=${encodeURIComponent(searchParams.sectionId)}`
       : "/admin/import";
     const params = new URLSearchParams({ callbackUrl: callbackPath });
     redirect(`/signin?${params.toString()}`);
