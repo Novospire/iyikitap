@@ -26,7 +26,11 @@ export default async function ImportPage({ searchParams }: ImportPageProps) {
   const session = await getServerSession(authOptions);
   
   if (!session) {
-    redirect("/signin");
+    const callbackPath = searchParams?.sectionId 
+      ? `/admin/import?sectionId=${searchParams.sectionId}`
+      : "/admin/import";
+    const params = new URLSearchParams({ callbackUrl: callbackPath });
+    redirect(`/signin?${params.toString()}`);
   }
 
   if (!process.env.DATABASE_URL) {
