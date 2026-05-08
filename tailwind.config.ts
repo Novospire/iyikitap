@@ -5,13 +5,34 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: "#0f172a",
-        mist: "#f8fafc",
-        brand: "#f97316",
-        accent: "#1d4ed8",
+        ink: "#000000",
+        mist: "#ffffff",
+        brand: "#D92D20",
+        "zinc-gray": "#d9d9d9",
+        "sterling": "#6e6e6e",
+        "cloud": "#e7e7e7",
+        "editorial-yellow": "#ffc500",
       },
-      boxShadow: {
-        card: "0 14px 40px rgba(15, 23, 42, 0.12)",
+      fontFamily: {
+        serif: ["Georgia", "Cambria", "'Times New Roman'", "Times", "serif"],
+        sans: [
+          "'Helvetica Neue'",
+          "Arial",
+          "ui-sans-serif",
+          "system-ui",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "'Segoe UI'",
+          "Roboto",
+          "sans-serif",
+        ],
+      },
+      maxWidth: {
+        editorial: "1296px",
+      },
+      letterSpacing: {
+        "editorial-tight": "-0.02em",
+        "editorial-heading": "-0.04em",
       },
     },
   },

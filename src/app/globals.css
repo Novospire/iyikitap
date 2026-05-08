@@ -7,9 +7,21 @@
 }
 
 body {
-  @apply bg-mist text-ink;
+  @apply bg-white text-ink;
+  font-family: 'Helvetica Neue', Arial, ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 a {
   @apply transition-colors;
+}
+
+/* Editorial no-scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
